@@ -31,5 +31,6 @@ $string['lock_success']        = 'Les évaluations ont été verrouillées avec 
 $string['lockgrades']          = 'Verrouiller les évaluations';
 $string['lockgrades:manage']   = 'Gérer le plugin lockgrades';
 $string['pluginname']          = 'Lock Grades';
+$string['privacy:metadata']    = 'Le plugin local Lockgrades verrouille uniquement les notes (il n\'utilise aucune donnée).';
 $string['unlock_success']      = 'Les évaluations ont été déverrouillées avec succès.';
 $string['unlockgrades']        = 'Déverrouiller les évaluations';

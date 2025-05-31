@@ -1,90 +1,90 @@
-# Lock Grades (`local_lockgrades`)
+# Lock Grades (local\_lockgrades)
 
 ## Description
 
-`local_lockgrades` is a Moodle plugin that allows administrators to recursively lock or unlock a grade category (grade items) along with all its subcategories and associated items, using an `idnumber` field as the identifier.
+`local_lockgrades` est un plugin Moodle permettant aux administrateurs de verrouiller ou déverrouiller de manière récursive une catégorie de notes (grade items) ainsi que toutes ses sous-catégories et éléments associés, en utilisant un champ `idnumber` comme identifiant.
 
-## Features
+## Fonctionnalités
 
-* **Recursive locking**: Locks a parent category and all its subcategories, updating the `locked`, `timemodified`, and `locktime` fields in the `mdl_grade_items` table.
-* **Recursive unlocking**: Unlocks the same items by resetting `locked` and `locktime` to 0 while preserving the modification timestamp (`timemodified`).
-* **Simple interface**: A form is available in the Moodle administration to enter the `idnumber` and choose the action (lock or unlock).
-* **Security**: Access is restricted to users with the `moodle/site:config` capability (administrators).
-* **Data integrity**: Uses transactions to ensure consistent updates.
+* **Verrouillage récursif** : Verrouille une catégorie principale et toutes ses sous-catégories, en mettant à jour les champs `locked`, `timemodified` et `locktime` de la table `mdl_grade_items`.
+* **Déverrouillage récursif** : Déverrouille les mêmes éléments en remettant `locked` et `locktime` à 0 tout en conservant l’horodatage de la modification (`timemodified`).
+* **Interface simple** : Formulaire disponible dans l’administration Moodle pour saisir l’`idnumber` et choisir l’action (verrouiller ou déverrouiller).
+* **Sécurité** : Accès limité aux utilisateurs disposant de la capacité `moodle/site:config` (administrateurs).
+* **Intégrité des données** : Utilisation de transactions pour garantir la cohérence des mises à jour.
 
-## Requirements
+## Prérequis
 
-* Moodle 3.5 or higher
-* SSH or FTP access to copy files to the server
-* Administrator rights on the Moodle platform
+* Moodle 3.5 ou supérieur
+* Accès SSH ou FTP pour copier les fichiers sur le serveur
+* Droits d’administrateur sur la plateforme Moodle
 
 ## Installation
 
-1. **Copy the files**
+1. **Copier les fichiers**
 
-   Place the `lockgrades` folder inside the `local/` directory of your Moodle installation, so the full path is:
+   Placer le dossier `lockgrades` dans le répertoire `local/` de votre installation Moodle, de sorte que le chemin complet soit :
 
    ```
    moodle/local/lockgrades/
    ```
 
-2. **Check permissions**
+2. **Vérifier les permissions**
 
-   Make sure files and directories have appropriate permissions (readable by the web server):
+   Assurez-vous que les fichiers et dossiers ont les permissions appropriées (lecture par le serveur web) :
 
    ```bash
    chown -R www-data:www-data moodle/local/lockgrades
    chmod -R 755 moodle/local/lockgrades
    ```
 
-3. **Database update**
+3. **Mise à jour de la base de données**
 
-   Log in as an administrator on your Moodle site. Moodle will automatically detect the new plugin and prompt you to update the database.
+   Connectez-vous en tant qu’administrateur sur votre site Moodle. Moodle détectera automatiquement le nouveau plugin et vous invitera à lancer la mise à jour de la base de données.
 
-4. **Verification**
+4. **Vérification**
 
-   Go to **Site administration > Plugins > Local plugins** and check that `Lock Grades` appears in the list.
+   Allez dans **Administration du site > Plugins > Local plugins** et vérifiez que `Lock Grades` apparaît dans la liste.
 
-## Usage
+## Utilisation
 
-1. Log in with an administrator account (with `moodle/site:config` capability).
+1. Connectez-vous avec un compte administrateur (capacité `moodle/site:config`).
 
-2. In your browser, open the URL:
+2. Dans votre navigateur, ouvrez l’URL :
 
    ```
-   https://your-moodle-site.local/local/lockgrades/index.php
+   https://votre-site-moodle.local/local/lockgrades/index.php
    ```
 
-3. Enter the **idnumber** of the main category whose grades you want to lock or unlock (e.g., `totPeriode_1`).
+3. Saisissez la valeur de l’**idnumber** de la catégorie principale dont vous souhaitez verrouiller ou déverrouiller les notes (par exemple `totPeriode_1`).
 
-4. Click on **Lock grades** or **Unlock grades**.
+4. Cliquez sur **Verrouiller les évaluations** ou **Déverrouiller les évaluations**.
 
-5. A notification will confirm the success of the operation.
+5. Une notification confirmera la réussite de l’opération.
 
-## File structure
+## Structure des fichiers
 
 ```
 local/lockgrades/
-├── form.php             # Form definition
-├── index.php            # Main page and plugin logic
-├── version.php          # Version and dependencies
+├── form.php             # Definition du formulaire
+├── index.php            # Page principale et logique du plugin
+├── version.php          # Version et dépendances
 └── lang/
     └── en/
-        └── local_lockgrades.php  # Language strings
+        └── local_lockgrades.php  # Chaînes de langue
 ```
 
-## Customization
+## Personnalisation
 
-* **Adjust capabilities**: To restrict access to other roles, modify the capability used in `index.php` (`moodle/site:config`).
-* **Edit messages**: Modify the language strings in `lang/en/local_lockgrades.php`.
+* **Adapter les capacités** : Si vous souhaitez restreindre l’accès à d’autres rôles, modifiez la capacité utilisée dans `index.php` (`moodle/site:config`).
+* **Modifier les messages** : Éditez les chaînes de langue dans `lang/en/local_lockgrades.php`.
 
-## License
+## Licence
 
-This plugin is distributed under the GNU GPL v3 license. See the `LICENSE` file for details.
+Ce plugin est distribué sous la licence GNU GPL v3. Voir le fichier `LICENSE` pour plus de détails.
 
-## Authors and support
+## Auteurs et support
 
-* **Author name**: Miguël Dhyne
-* **Contact**: [miguel.dhyne@gmail.com](mailto:miguel.dhyne@gmail.com)
+* **Nom de l’auteur** : Votre Nom
+* **Contact** : [votre.email@exemple.com](mailto:votre.email@exemple.com)
 
-For any questions or contributions, please open an issue or submit a pull request on the project’s GitHub repository.
+Pour toute question ou contribution, veuillez ouvrir une issue ou soumettre une pull request sur le dépôt GitHub du projet.

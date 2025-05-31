@@ -15,22 +15,31 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings for the local_lockgrades plugin.
- *
- * Contains all English language strings used by the Wiki Creator plugin,
- * including those for settings, interface labels, and messages.
+ * API privacy for local_lockgrades
  *
  * @package   local_lockgrades
  * @copyright 2025, Miguël Dhyne <miguel.dhyne@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['error_noidnumber']    = 'Insert a valid ID';
-$string['idnumber']            = 'ID of categories';
-$string['lock_success']        = 'Lock successful';
-$string['lockgrades']          = 'Lock grades';
-$string['lockgrades:manage']   = 'Manage grade-locking plugin';
-$string['pluginname']          = 'Lock Grades';
-$string['privacy:metadata']    = 'The Lockgrades local plugin only lock grades (it uses no data).';
-$string['unlock_success']      = 'Unlock successful';
-$string['unlockgrades']        = 'Unlock grades';
+ namespace local_lockgrades\privacy;
+
+ /**
+  * Privacy provider for local_lockgrades.
+  *
+  * Ce plugin ne stocke aucune donnée personnelle.
+  *
+  * @package   local_lockgrades
+  */
+class provider implements
+     \core_privacy\local\metadata\null_provider {
+
+     /**
+      * Returns a string explaining why this plugin stores no data.
+      *
+      * @return  string
+      */
+    public static function get_reason(): string {
+          return 'privacy:metadata';
+    }
+}
