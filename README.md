@@ -61,18 +61,6 @@
 
 5. A notification will confirm the success of the operation.
 
-## File structure
-
-```
-local/lockgrades/
-├── form.php             # Form definition
-├── index.php            # Main page and plugin logic
-├── version.php          # Version and dependencies
-└── lang/
-    └── en/
-        └── local_lockgrades.php  # Language strings
-```
-
 ## Customization
 
 * **Adjust capabilities**: To restrict access to other roles, modify the capability used in `index.php` (`moodle/site:config`).
