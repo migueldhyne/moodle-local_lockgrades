@@ -99,11 +99,12 @@ $mform->display();
 echo $OUTPUT->footer();
 
 /**
- * Recursively locks (or unlocks) all items and subcategories starting from an iteminstance of grade_items.
+ * Recursively locks (or unlocks) all items and sub-categories starting from an iteminstance in grade_items.
  *
- * @param int $iteminstance The starting iteminstance (main category)
- * @param bool $lock true = lock, false = unlock
- * @param array &$visited Array of IDs already processed (avoids infinite loops).
+ * @param int   $iteminstance L'ID de l'instance de départ (catégorie principale)
+ * @param bool  $lock         true pour verrouiller, false pour déverrouiller (par défaut true)
+ * @param array $visited      Tableau des IDs déjà traités (par référence, optionnel)
+ * @return void
  */
 function local_lockgrades_recursive_lock($iteminstance, $lock = true, &$visited = []) {
     global $DB;
