@@ -29,10 +29,10 @@
 
 require_once(__DIR__.'/../../config.php');
 require_once($CFG->dirroot . '/local/lockgrades/form.php');
+require_once($CFG->libdir . '/gradelib.php');
 
 require_login();
-// Only an administrator can access this plugin.
-require_capability('moodle/site:config', context_system::instance());
+require_capability('local/lockgrades:manage', context_system::instance());
 
 $PAGE->set_url(new moodle_url('/local/lockgrades/index.php'));
 $PAGE->set_context(context_system::instance());
@@ -44,160 +44,108 @@ $mform = new local_lockgrades_form();
 echo $OUTPUT->header();
 
 if ($mform->is_cancelled()) {
-    // Redirect to the configuration page in the event of cancellation.
     redirect(new moodle_url('/admin/settings.php'));
 } else if ($data = $mform->get_data()) {
+
     $idnumber = trim($data->idnumber);
-    if (empty($idnumber)) {
-        echo $OUTPUT->notification(get_string('error_noidnumber', 'local_lockgrades'));
-    } else {
-        // Use of a transaction to guarantee the integrity of updates.
-        $transaction = $DB->start_delegated_transaction();
-        if (!empty($data->lock)) {
-            lock_grade_items_recursive($idnumber);
-            $message = get_string('lock_success', 'local_lockgrades');
-        } else if (!empty($data->unlock)) {
-            unlock_grade_items_recursive($idnumber);
-            $message = get_string('unlock_success', 'local_lockgrades');
-        }
-        $transaction->allow_commit();
-        echo $OUTPUT->notification($message);
+
+    // We start with all grade_items having this idnumber (and therefore potentially several).
+    $gradeitems = $DB->get_records('grade_items', ['idnumber' => $idnumber]);
+
+    if (!$gradeitems) {
+        echo $OUTPUT->notification(get_string('error_invalididnumber', 'local_lockgrades'));
+        echo html_writer::link(new moodle_url('/local/lockgrades/index.php'), get_string('backtoform', 'local_lockgrades'));
+        echo $OUTPUT->footer();
+        exit;
     }
+
+    $transaction = $DB->start_delegated_transaction();
+
+    foreach ($gradeitems as $gradeitem) {
+        // Run recursion for each item.
+        if (!empty($data->lock)) {
+            local_lockgrades_recursive_lock($gradeitem->iteminstance);
+        } else if (!empty($data->unlock)) {
+            local_lockgrades_recursive_lock($gradeitem->iteminstance, false);
+        }
+    }
+
+    $transaction->allow_commit();
+
+    $message = !empty($data->lock) ? get_string('lock_success', 'local_lockgrades')
+    : get_string('unlock_success', 'local_lockgrades');
+    echo $OUTPUT->notification($message);
+
+    // Display of explanatory insert AFTER lock/unlock action.
+    echo $OUTPUT->box(
+        "<strong>Note importante :</strong><br>
+        Lorsque vous verrouillez une note, Moodle peut afficher un message
+        d’avertissement dans le carnet de notes ainsi qu’un bouton « Recalculer malgré tout ».<br>
+        <ul>
+        <li>Ce message signifie que toute modification des notes via l’activité
+        ne sera pas reportée tant que la note reste verrouillée.</li>
+        <li>Le bouton « Recalculer malgré tout » permet de forcer la mise à jour
+        des notes, même pour les éléments verrouillés.</li>
+        <li>Utilisez ce bouton avec précaution : toute modification forcée peut
+        écraser une note verrouillée et générer une incohérence.</li>
+        </ul>
+        Ce comportement est normal et vise à sécuriser la gestion des notes dans Moodle.
+        ",
+        'generalbox boxaligncenter', 'lockgrades-info'
+    );
 }
 
 $mform->display();
 echo $OUTPUT->footer();
 
 /**
- * Recursively locks the grade elements for the initial category and its sub-categories.
+ * Recursively locks (or unlocks) all items and subcategories starting from an iteminstance of grade_items.
  *
- * @param string $idnumber The identifier of the initial category.
+ * @param int $iteminstance The starting iteminstance (main category)
+ * @param bool $lock true = lock, false = unlock
+ * @param array &$visited Array of IDs already processed (avoids infinite loops).
  */
-function lock_grade_items_recursive($idnumber) {
+function local_lockgrades_recursive_lock($iteminstance, $lock = true, &$visited = []) {
     global $DB;
-    $timestamp = time();
 
-    // Step 1: Lock the initial element and its associated elements.
-    $sql = "UPDATE {grade_items}
-            SET locked = ?,
-                timemodified = ?,
-                locktime = ?
-            WHERE iteminstance IN (SELECT iteminstance FROM {grade_items} WHERE idnumber = ?)
-               OR categoryid IN (SELECT iteminstance FROM {grade_items} WHERE idnumber = ?)";
-    $DB->execute($sql, [$timestamp, $timestamp, $timestamp, $idnumber, $idnumber]);
-
-    // Retrieve the initial element corresponding to the supplied idnumber.
-    $gradeitem = $DB->get_record('grade_items', ['idnumber' => $idnumber]);
-    if (!$gradeitem) {
-         return;
+    if (in_array($iteminstance, $visited, true)) {
+        return;
     }
+    $visited[] = $iteminstance;
 
-    // Step 2: Retrieve the sub-categories of the initial element.
-    $subcategories = $DB->get_records_sql("SELECT id FROM {grade_categories} WHERE parent = ?", [$gradeitem->iteminstance]);
-    if ($subcategories) {
-        foreach ($subcategories as $subcategory) {
-             // Step 3: Lock sub-category items.
-             $sqlupdate = "UPDATE {grade_items}
-                           SET locked = ?,
-                               timemodified = ?,
-                               locktime = ?
-                           WHERE iteminstance = ? OR categoryid = ?";
-             $DB->execute($sqlupdate, [$timestamp, $timestamp, $timestamp, $subcategory->id, $subcategory->id]);
+    $now = time();
 
-             // Step 4: Recursive call to process nested sub-categories.
-             lock_subcategories_recursive($subcategory->id);
+    // STEP 1 & 3: (Un)lock all items with iteminstance OR categoryid = $iteminstance.
+    $items = $DB->get_records('grade_items', [
+        'iteminstance' => $iteminstance,
+    ]);
+    foreach ($items as $item) {
+        $gi = grade_item::fetch(['id' => $item->id]);
+        if ($gi) {
+            $gi->set_locked($lock);
+            $gi->locktime = $lock ? $now : 0;
+            $gi->timemodified = $now;
+            $gi->update();
         }
     }
-}
-
-/**
- * Recursive function for locking sub-categories from a given parent identifier.
- *
- * @param int $parentid The id of the parent category.
- */
-function lock_subcategories_recursive($parentid) {
-    global $DB;
-    $timestamp = time();
-    $sqlupdate = "UPDATE {grade_items}
-                  SET locked = ?,
-                      timemodified = ?,
-                      locktime = ?
-                  WHERE iteminstance = ? OR categoryid = ?";
-    $DB->execute($sqlupdate, [$timestamp, $timestamp, $timestamp, $parentid, $parentid]);
-
-    // Retrieve sub-categories from the current parent.
-    $subcategories = $DB->get_records_sql("SELECT id FROM {grade_categories} WHERE parent = ?", [$parentid]);
-    if ($subcategories) {
-        foreach ($subcategories as $subcategory) {
-             $DB->execute($sqlupdate, [$timestamp, $timestamp, $timestamp, $subcategory->id, $subcategory->id]);
-             lock_subcategories_recursive($subcategory->id);
+    // We also do categoryid.
+    $items = $DB->get_records('grade_items', [
+        'categoryid' => $iteminstance,
+    ]);
+    foreach ($items as $item) {
+        $gi = grade_item::fetch(['id' => $item->id]);
+        if ($gi) {
+            $gi->set_locked($lock);
+            $gi->locktime = $lock ? $now : 0;
+            $gi->timemodified = $now;
+            $gi->update();
         }
     }
-}
 
-/**
- * Recursively unlocks grade elements for the initial category and its sub-categories.
- *
- * @param string $idnumber The identifier of the initial category.
- */
-function unlock_grade_items_recursive($idnumber) {
-    global $DB;
-    $timestamp = time();
-
-    // Step 1: Unlock the initial element and its associated elements by setting locked and locktime to NULL.
-    $sql = "UPDATE {grade_items}
-        SET locked = 0,
-            timemodified = ?,
-            locktime = 0
-            WHERE iteminstance IN (SELECT iteminstance FROM {grade_items} WHERE idnumber = ?)
-               OR categoryid IN (SELECT iteminstance FROM {grade_items} WHERE idnumber = ?)";
-    $DB->execute($sql, [$timestamp, $idnumber, $idnumber]);
-
-    // Retrieve the initial element corresponding to the supplied idnumber.
-    $gradeitem = $DB->get_record('grade_items', ['idnumber' => $idnumber]);
-    if (!$gradeitem) {
-         return;
-    }
-
-    // Step 2: Retrieve the sub-categories of the initial element.
-    $subcategories = $DB->get_records_sql("SELECT id FROM {grade_categories} WHERE parent = ?", [$gradeitem->iteminstance]);
-    if ($subcategories) {
-        foreach ($subcategories as $subcategory) {
-             // Step 3: Unlock sub-category items.
-             $sqlupdate = "UPDATE {grade_items}
-        SET locked = 0,
-            timemodified = ?,
-            locktime = 0
-                           WHERE iteminstance = ? OR categoryid = ?";
-             $DB->execute($sqlupdate, [$timestamp, $subcategory->id, $subcategory->id]);
-
-             // Step 4: Recursive call to process nested sub-categories.
-             unlock_subcategories_recursive($subcategory->id);
-        }
-    }
-}
-
-/**
- * Recursive function to unlock sub-categories from a given parent identifier.
- *
- * @param int $parentid The id of the parent category.
- */
-function unlock_subcategories_recursive($parentid) {
-    global $DB;
-    $timestamp = time();
-    $sqlupdate = "UPDATE {grade_items}
-        SET locked = 0,
-            timemodified = ?,
-            locktime = 0
-                  WHERE iteminstance = ? OR categoryid = ?";
-    $DB->execute($sqlupdate, [$timestamp, $parentid, $parentid]);
-
-    // Retrieve sub-categories from the current parent.
-    $subcategories = $DB->get_records_sql("SELECT id FROM {grade_categories} WHERE parent = ?", [$parentid]);
-    if ($subcategories) {
-        foreach ($subcategories as $subcategory) {
-             $DB->execute($sqlupdate, [$timestamp, $subcategory->id, $subcategory->id]);
-             unlock_subcategories_recursive($subcategory->id);
-        }
+    // STEP 2 & 4: search for sub-categories.
+    $subcategories = $DB->get_records('grade_categories', ['parent' => $iteminstance]);
+    foreach ($subcategories as $subcategory) {
+        // Recursive call for each sub-category found.
+        local_lockgrades_recursive_lock($subcategory->id, $lock, $visited);
     }
 }

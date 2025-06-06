@@ -25,12 +25,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['backtoform'] = 'Back to the form';
+$string['error_invalididnumber'] = 'The specified category ID number was not found.';
 $string['error_noidnumber']    = 'Insert a valid ID';
 $string['idnumber']            = 'ID of categories';
-$string['lock_success']        = 'Lock successful';
+$string['lock_success'] = 'Grades have been successfully locked.';
 $string['lockgrades']          = 'Lock grades';
 $string['lockgrades:manage']   = 'Manage grade-locking plugin';
 $string['pluginname']          = 'Lock Grades';
 $string['privacy:metadata']    = 'The Lockgrades local plugin only lock grades (it uses no data).';
-$string['unlock_success']      = 'Unlock successful';
+$string['unlock_success'] = 'Grades have been successfully unlocked.';
 $string['unlockgrades']        = 'Unlock grades';
