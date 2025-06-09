@@ -87,8 +87,9 @@ echo $OUTPUT->footer();
  * Recursively locks (or unlocks) all items and subcategories starting from an iteminstance of grade_items.
  *
  * @param int $iteminstance The starting iteminstance (main category)
- * @param bool $lock true = lock, false = unlock
- * @param array &$visited Array of IDs already processed (avoids infinite loops).
+ * @param bool $lock Whether to lock (true) or unlock (false) the items (optional, default true)
+ * @param array $visited Array of IDs already processed (avoids infinite loops), passed by reference (optional)
+ * @return void
  */
 function local_lockgrades_recursive_lock($iteminstance, $lock = true, &$visited = []) {
     global $DB;
