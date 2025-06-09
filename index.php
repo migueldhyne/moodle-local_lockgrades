@@ -77,34 +77,18 @@ if ($mform->is_cancelled()) {
     echo $OUTPUT->notification($message);
 
     // Display of explanatory insert AFTER lock/unlock action.
-    echo $OUTPUT->box(
-        "<strong>Note importante :</strong><br>
-        Lorsque vous verrouillez une note, Moodle peut afficher un message
-        d’avertissement dans le carnet de notes ainsi qu’un bouton « Recalculer malgré tout ».<br>
-        <ul>
-        <li>Ce message signifie que toute modification des notes via l’activité
-        ne sera pas reportée tant que la note reste verrouillée.</li>
-        <li>Le bouton « Recalculer malgré tout » permet de forcer la mise à jour
-        des notes, même pour les éléments verrouillés.</li>
-        <li>Utilisez ce bouton avec précaution : toute modification forcée peut
-        écraser une note verrouillée et générer une incohérence.</li>
-        </ul>
-        Ce comportement est normal et vise à sécuriser la gestion des notes dans Moodle.
-        ",
-        'generalbox boxaligncenter', 'lockgrades-info'
-    );
+    echo $OUTPUT->box(get_string('lockgrades_info', 'local_lockgrades'), 'generalbox boxaligncenter', 'lockgrades-info');
 }
 
 $mform->display();
 echo $OUTPUT->footer();
 
 /**
- * Recursively locks (or unlocks) all items and sub-categories starting from an iteminstance in grade_items.
+ * Recursively locks (or unlocks) all items and subcategories starting from an iteminstance of grade_items.
  *
- * @param int   $iteminstance L'ID de l'instance de départ (catégorie principale)
- * @param bool  $lock         true pour verrouiller, false pour déverrouiller (par défaut true)
- * @param array $visited      Tableau des IDs déjà traités (par référence, optionnel)
- * @return void
+ * @param int $iteminstance The starting iteminstance (main category)
+ * @param bool $lock true = lock, false = unlock
+ * @param array &$visited Array of IDs already processed (avoids infinite loops).
  */
 function local_lockgrades_recursive_lock($iteminstance, $lock = true, &$visited = []) {
     global $DB;

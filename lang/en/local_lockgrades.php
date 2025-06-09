@@ -32,6 +32,14 @@ $string['idnumber']            = 'ID of categories';
 $string['lock_success'] = 'Grades have been successfully locked.';
 $string['lockgrades']          = 'Lock grades';
 $string['lockgrades:manage']   = 'Manage grade-locking plugin';
+$string['lockgrades_info'] = '<strong>Important note:</strong><br>
+When you lock a grade, Moodle may display a warning message in the gradebook as well as a "Recalculate anyway" button.<br>
+<ul>
+<li>This message means that any changes to grades made via the activity will not be reflected as long as the grade remains locked.</li>
+<li>The "Recalculate anyway" button allows you to force the update of grades, even for locked items.</li>
+<li>Use this button with caution: any forced modification may overwrite a locked grade and cause inconsistency.</li>
+</ul>
+This behavior is normal and is intended to secure grade management in Moodle.';
 $string['pluginname']          = 'Lock Grades';
 $string['privacy:metadata']    = 'The Lockgrades local plugin only lock grades (it uses no data).';
 $string['unlock_success'] = 'Grades have been successfully unlocked.';

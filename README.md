@@ -41,10 +41,6 @@
 
    Log in as an administrator on your Moodle site. Moodle will automatically detect the new plugin and prompt you to update the database.
 
-4. **Verification**
-
-   Go to **Site administration > Plugins > Local plugins** and check that `Lock Grades` appears in the list.
-
 ## Usage
 
 1. Log in with an administrator account (with `moodle/site:config` capability).

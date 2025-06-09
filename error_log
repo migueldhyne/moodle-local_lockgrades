@@ -1,18 +1,3 @@
-[21-May-2025 15:25:23 Europe/Paris] Default exception handler: Désolé, vous n’avez actuellement pas les permissions requises pour effectuer ceci ([[lockgrades:manage]]) Debug: 
-Error code: nopermissions
-* line 875 of /lib/accesslib.php: required_capability_exception thrown
-* line 33 of /local/lockgrades/form.php: call to require_capability()
-* line 31 of /local/lockgrades/index.php: call to require_once()
-
-[21-May-2025 15:27:56 Europe/Paris] Default exception handler: Désolé, vous n’avez actuellement pas les permissions requises pour effectuer ceci (Gérer le plugin lockgrades) Debug: 
-Error code: nopermissions
-* line 875 of /lib/accesslib.php: required_capability_exception thrown
-* line 33 of /local/lockgrades/form.php: call to require_capability()
-* line 31 of /local/lockgrades/index.php: call to require_once()
-
-[21-May-2025 15:29:00 Europe/Paris] Default exception handler: Désolé, vous n’avez actuellement pas les permissions requises pour effectuer ceci (Gérer le plugin lockgrades) Debug: 
-Error code: nopermissions
-* line 875 of /lib/accesslib.php: required_capability_exception thrown
-* line 33 of /local/lockgrades/form.php: call to require_capability()
-* line 31 of /local/lockgrades/index.php: call to require_once()
-
+[10-Jun-2025 00:22:38 Europe/Paris] PHP Fatal error:  Cannot redeclare local_lockgrades_recursive_lock() (previously declared in /home/edutestl/test.edutestlab.be/moodle/local/lockgrades/index.php:93) in /home/edutestl/test.edutestlab.be/moodle/local/lockgrades/index.php on line 137
+[10-Jun-2025 00:26:00 Europe/Paris] PHP Fatal error:  Cannot redeclare local_lockgrades_recursive_lock() (previously declared in /home/edutestl/test.edutestlab.be/moodle/local/lockgrades/index.php:93) in /home/edutestl/test.edutestlab.be/moodle/local/lockgrades/index.php on line 137
+[10-Jun-2025 00:26:04 Europe/Paris] PHP Fatal error:  Cannot redeclare local_lockgrades_recursive_lock() (previously declared in /home/edutestl/test.edutestlab.be/moodle/local/lockgrades/index.php:93) in /home/edutestl/test.edutestlab.be/moodle/local/lockgrades/index.php on line 137
