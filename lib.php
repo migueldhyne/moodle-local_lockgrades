@@ -35,8 +35,8 @@
  * - Subcategories (recursively)
  *
  * @param int   $iteminstance ID of the item instance or category to explore.
- * @param array &$visited     Reference to an array containing visited instances and categories.
- *
+ * @param array $visited      Reference to an array containing visited instances and categories.
+ *                            (Must be passed by reference.)
  * @return void
  */
 function local_lockgrades_recursive_collect($iteminstance, array &$visited) {
@@ -69,10 +69,11 @@ function local_lockgrades_recursive_collect($iteminstance, array &$visited) {
  * Updates both the grade_categories record and the grade_item of type 'category',
  * then descends to child categories and their items.
  *
- * @param int   $catid      ID of the grade_categories record.
- * @param bool  $lock       True to lock, false to unlock.
- * @param array &$visited   Reference to an array of already visited category IDs.
- * @param bool  $force      True to force (ignore parent locks on unlock).
+ * @param int   $catid    ID of the grade_categories record.
+ * @param bool  $lock     True to lock, false to unlock.
+ * @param array $visited  Reference to an array of already visited category IDs.
+ *                        (Must be passed by reference.)
+ * @param bool  $force    True to force (ignore parent locks on unlock).
  * @return void
  */
 function local_lockgrades_recursive_lock($catid, $lock = true, array &$visited = [], $force = false) {
