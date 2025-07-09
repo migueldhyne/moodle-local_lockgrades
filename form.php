@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Form for local_lockgrades
+ * Form of local_lockgrades plugin
  *
  * @package   local_lockgrades
  * @copyright 2025, Miguël Dhyne <miguel.dhyne@gmail.com>
@@ -24,41 +24,86 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Load core config (so global state is set up).
-require_once(__DIR__ . '/../../config.php');
-
-// Security: require the user to be logged in, and check capability.
-require_login();
-$context = context_system::instance();
-require_capability('local/lockgrades:manage', $context);
-
-// Then load the form library.
 require_once($CFG->libdir . '/formslib.php');
 
 /**
- * local_lockgrades_form class.
+ * Form for local_gradelocks plugin
  *
- * Presents a form with:
- *  - A required text field for the user’s idnumber
- *  - A “Lock grades” submit button
- *  - An “Unlock grades” submit button
+ * @package   local_lockgrades
+ * @copyright 2025, Miguël Dhyne <miguel.dhyne@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_lockgrades_form extends moodleform {
     /**
-     * Defines the form elements.
+     * Defines the form elements for the local_lockgrades plugin.
+     *
+     * Adds required and optional fields, a date/time selector with optional activation,
+     * and a group of action buttons (immediate and scheduled locking/unlocking, and preview).
+     * Also injects JavaScript to enable or disable buttons dynamically depending
+     * on whether scheduling is enabled.
      *
      * @return void
      */
     public function definition() {
-         $mform = $this->_form;
+        $mform = $this->_form;
 
-         // Input field for idnumber.
-         $mform->addElement('text', 'idnumber', get_string('idnumber', 'local_lockgrades'));
-         $mform->setType('idnumber', PARAM_TEXT);
-         $mform->addRule('idnumber', null, 'required', null, 'client');
+        // Required fields : category idnumber.
+        $mform->addElement('text', 'idnumber', get_string('idnumber', 'local_lockgrades'));
+        $mform->setType('idnumber', PARAM_TEXT);
+        $mform->addRule('idnumber', null, 'required', null, 'client');
 
-         // Action buttons: one to lock and one to unlock.
-         $mform->addElement('submit', 'lock', get_string('lockgrades', 'local_lockgrades'));
-         $mform->addElement('submit', 'unlock', get_string('unlockgrades', 'local_lockgrades'));
+        // Filter pattern.
+        $mform->addElement('text', 'pattern', get_string('pattern', 'local_lockgrades'));
+        $mform->setType('pattern', PARAM_TEXT);
+        $mform->addHelpButton('pattern', 'pattern', 'local_lockgrades');
+
+        // Select date/time.
+        $mform->addElement('date_time_selector', 'scheduledtime',
+            get_string('scheduledtime', 'local_lockgrades'), ['optional' => true]);
+        $mform->addHelpButton('scheduledtime', 'scheduledtime', 'local_lockgrades');
+
+        // Buttons.
+        $buttons = [];
+        $buttons[] = $mform->createElement('submit', 'lock', get_string('lockgrades', 'local_lockgrades'));
+        $buttons[] = $mform->createElement('submit', 'unlock', get_string('unlockgrades', 'local_lockgrades'));
+        $buttons[] = $mform->createElement('submit', 'schedulelock', get_string('schedulelock', 'local_lockgrades'));
+        $buttons[] = $mform->createElement('submit', 'scheduleunlock', get_string('scheduleunlock', 'local_lockgrades'));
+        $buttons[] = $mform->createElement('submit', 'preview', get_string('previewimpact', 'local_lockgrades'));
+        $mform->addGroup($buttons, 'actionbuttons', '', [' '], false);
+
+        // JS for dynamic buttons.
+        $script = <<<JS
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function updateButtons() {
+        var enabledBox = document.querySelector('input[name="scheduledtime[enabled]"]');
+        var isEnabled = enabledBox ? enabledBox.checked : false;
+
+        // Boutons immédiats (actifs si pas planifié)
+        var lockBtn = document.querySelector('input[name="lock"]');
+        var unlockBtn = document.querySelector('input[name="unlock"]');
+        if (lockBtn) lockBtn.disabled = isEnabled;
+        if (unlockBtn) unlockBtn.disabled = isEnabled;
+
+        // Boutons planification (actifs si planifié)
+        var schedLockBtn = document.querySelector('input[name="schedulelock"]');
+        var schedUnlockBtn = document.querySelector('input[name="scheduleunlock"]');
+        if (schedLockBtn) schedLockBtn.disabled = !isEnabled;
+        if (schedUnlockBtn) schedUnlockBtn.disabled = !isEnabled;
+
+        // Preview toujours actif
+        var previewBtn = document.querySelector('input[name="preview"]');
+        if (previewBtn) previewBtn.disabled = false;
+    }
+
+    document.querySelectorAll('select[name^="scheduledtime["],input[name="scheduledtime[enabled]"]').forEach(function(el){
+        el.addEventListener('change', updateButtons);
+    });
+
+    updateButtons();
+});
+</script>
+JS;
+        $mform->addElement('html', $script);
     }
 }

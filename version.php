@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025061000;       // The plugin version (YYYYMMDDXX).
+$plugin->version   = 2025070800;       // The plugin version (YYYYMMDDXX).
 $plugin->requires  = 2022091900;       // Minimum version of Moodle required.
 $plugin->component = 'local_lockgrades';
-$plugin->release    = '1.1 (Build 2025-05-31)';
+$plugin->release    = '1.6 (Build 2025070800)';
 $plugin->maturity  = MATURITY_STABLE;

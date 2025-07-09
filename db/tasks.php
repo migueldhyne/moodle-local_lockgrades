@@ -15,31 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * API privacy for local_lockgrades
+ * Scheduled task definitions for local_lockgrades plugi
+ *
+ * Contains all French language strings used by the Wiki Creator plugin,
+ * including those for settings, interface labels, and messages.
  *
  * @package   local_lockgrades
  * @copyright 2025, Miguël Dhyne <miguel.dhyne@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- namespace local_lockgrades\privacy;
+defined('MOODLE_INTERNAL') || die();
 
- /**
-  * Privacy provider for local_lockgrades.
-  *
-  * This plugin does not store any personal data.
-  *
-  * @package   local_lockgrades
-  */
-class provider implements
-     \core_privacy\local\metadata\null_provider {
-
-     /**
-      * Returns a string explaining why this plugin stores no data.
-      *
-      * @return  string
-      */
-    public static function get_reason(): string {
-          return 'privacy:metadata';
-    }
-}
+$tasks = [
+    [
+        'classname' => '\\local_lockgrades\\task\\scheduled_task',
+        'blocking'  => 0,
+        'minute'    => '*/2',   // Every 2 minutes.
+        'hour'      => '*',
+        'day'       => '*',
+        'month'     => '*',
+        'dayofweek' => '*',
+        'disabled'  => 0,
+    ],
+];

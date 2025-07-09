@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/lockgrades/db" VERSION="2025070900" COMMENT="Install schema for local_lockgrades scheduling and log tables">
+    <TABLES>
+        <TABLE NAME="local_lockgrades_schedule" COMMENT="Scheduled lock/unlock jobs">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="idnumber" TYPE="char" LENGTH="255" NOTNULL="true" />
+                <FIELD NAME="pattern" TYPE="char" LENGTH="255" NOTNULL="false" />
+                <FIELD NAME="locktype" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="lock" />
+                <FIELD NAME="scheduledfor" TYPE="int" LENGTH="10" NOTNULL="true" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="idx_schedfor" UNIQUE="false" FIELDS="scheduledfor" />
+                <!-- Optionnel : <INDEX NAME="idx_idnumber" UNIQUE="false" FIELDS="idnumber" /> -->
+            </INDEXES>
+        </TABLE>
+
+        <TABLE NAME="local_lockgrades_log" COMMENT="Log of lock/unlock operations (history)">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key"/>
+                <FIELD NAME="idnumber" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="pattern" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT=""/>
+                <FIELD NAME="action" TYPE="char" LENGTH="10" NOTNULL="true" COMMENT="'lock' or 'unlock'"/>
+                <FIELD NAME="scheduledfor" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Planned date"/>
+                <FIELD NAME="executed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="executiondate" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0"/>
+                <FIELD NAME="impacted" TYPE="text" NOTNULL="false" COMMENT="JSON or summary of items/categories/courses impacted"/>
+                <FIELD NAME="log" TYPE="text" NOTNULL="false" COMMENT="Details and errors"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="idx_idnumber" UNIQUE="false" FIELDS="idnumber" />
+                <INDEX NAME="idx_action" UNIQUE="false" FIELDS="action" />
+                <INDEX NAME="idx_scheduledfor" UNIQUE="false" FIELDS="scheduledfor" />
+                <INDEX NAME="idx_executed" UNIQUE="false" FIELDS="executed" />
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>
