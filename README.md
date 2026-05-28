@@ -1,4 +1,4 @@
-# Lock Grades (`local_lockgrades`) - modif pour rien faire
+# Lock Grades (`local_lockgrades`) - modif pour rien faire !
 
 ## Description
 
